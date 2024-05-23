@@ -37,72 +37,72 @@ func newClientOptions() *Options {
 }
 
 func WithRetryCount(count int) Option {
-	return func(conf *Options) {
+	return func(o *Options) {
 		if count >= 0 {
-			conf.retryCount = count
+			o.retryCount = count
 		}
 	}
 }
 
 func WithRetryWaitTime(waitTime time.Duration) Option {
-	return func(conf *Options) {
+	return func(o *Options) {
 		if waitTime >= 100*time.Millisecond {
-			conf.retryWaitTime = waitTime
+			o.retryWaitTime = waitTime
 		}
 	}
 }
 
 func WithRetryMaxWaitTime(maxWaitTime time.Duration) Option {
-	return func(conf *Options) {
+	return func(o *Options) {
 		if maxWaitTime >= 100*time.Millisecond {
-			conf.retryMaxWaitTime = maxWaitTime
+			o.retryMaxWaitTime = maxWaitTime
 		}
 	}
 }
 
 func WithRequestLogger(logger RequestLogger) Option {
-	return func(conf *Options) {
+	return func(o *Options) {
 		if logger != nil {
-			conf.requestLogger = logger
+			o.requestLogger = logger
 		}
 	}
 }
 
 func WithRetryPolicy(policy func(*resty.Response, error) bool) Option {
-	return func(conf *Options) {
+	return func(o *Options) {
 		if policy != nil {
-			conf.retryPolicy = policy
+			o.retryPolicy = policy
 		}
 	}
 }
 
 func WithRequestHeader(header, value string) Option {
-	return func(conf *Options) {
+	return func(o *Options) {
 		header = strings.TrimSpace(header)
 
 		if header == "" || strings.EqualFold(header, "Content-Type") || strings.EqualFold(header, "Accept") {
 			return
 		}
 
-		conf.requestHeaders[header] = value
+		o.requestHeaders[header] = value
 	}
 }
 
 func WithBasicAuth(username, password string) Option {
-	return func(conf *Options) {
-		conf.basicAuthUsername = username
-		conf.basicAuthPassword = password
+	return func(o *Options) {
+		o.basicAuthUsername = username
+		o.basicAuthPassword = password
 	}
 }
 
 func WithAuthScheme(scheme string) Option {
-	return func(conf *Options) {
-		conf.authScheme = scheme
+	return func(o *Options) {
+		o.authScheme = scheme
 	}
 }
 
 func WithAuthToken(token string) Option {
-	return func(conf *Options) {
-		conf.authToken = token
+	return func(o *Options) {
+		o.authToken = token
 	}
 }
