@@ -48,6 +48,7 @@ linters:
           - gochecknoglobals
           - gosec
           - revive
+          - testpackage
         path: _test\.go
       - linters:
           - asasalint

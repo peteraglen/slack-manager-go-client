@@ -24,6 +24,11 @@ type alertsList struct {
 	Alerts []*common.Alert `json:"alerts"`
 }
 
+// apiErrorResponse represents the standard error response from the API.
+type apiErrorResponse struct {
+	Error string `json:"error"`
+}
+
 // New creates a new Client with the given base URL and options.
 // The client must be connected with Connect before sending alerts.
 func New(baseURL string, opts ...Option) *Client {
@@ -153,9 +158,14 @@ func (c *Client) post(ctx context.Context, path string, body []byte) error {
 func getBodyErrorMessage(response *resty.Response) string {
 	body := response.Body()
 
-	if len(body) > 0 {
-		return string(body)
+	if len(body) == 0 {
+		return "(empty error body)"
 	}
 
-	return "(empty error body)"
+	var apiErr apiErrorResponse
+	if err := json.Unmarshal(body, &apiErr); err == nil && apiErr.Error != "" {
+		return apiErr.Error
+	}
+
+	return string(body)
 }
