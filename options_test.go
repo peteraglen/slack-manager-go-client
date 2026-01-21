@@ -39,6 +39,34 @@ func TestNewClientOptions(t *testing.T) {
 	if opts.requestHeaders["Accept"] != "application/json" {
 		t.Errorf("expected Accept=application/json, got %s", opts.requestHeaders["Accept"])
 	}
+
+	if opts.timeout != 30*time.Second {
+		t.Errorf("expected timeout=30s, got %v", opts.timeout)
+	}
+
+	if opts.userAgent != "slack-manager-go-client/1.0" {
+		t.Errorf("expected userAgent=slack-manager-go-client/1.0, got %s", opts.userAgent)
+	}
+
+	if opts.maxIdleConns != 100 {
+		t.Errorf("expected maxIdleConns=100, got %d", opts.maxIdleConns)
+	}
+
+	if opts.maxConnsPerHost != 10 {
+		t.Errorf("expected maxConnsPerHost=10, got %d", opts.maxConnsPerHost)
+	}
+
+	if opts.idleConnTimeout != 90*time.Second {
+		t.Errorf("expected idleConnTimeout=90s, got %v", opts.idleConnTimeout)
+	}
+
+	if opts.disableKeepAlive != false {
+		t.Errorf("expected disableKeepAlive=false, got %v", opts.disableKeepAlive)
+	}
+
+	if opts.maxRedirects != 10 {
+		t.Errorf("expected maxRedirects=10, got %d", opts.maxRedirects)
+	}
 }
 
 func TestWithRetryCount(t *testing.T) {
@@ -269,6 +297,204 @@ func TestWithAuthToken(t *testing.T) {
 	}
 }
 
+func TestWithTimeout(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		input    time.Duration
+		expected time.Duration
+	}{
+		{"valid", 10 * time.Second, 10 * time.Second},
+		{"minimum valid", 1 * time.Second, 1 * time.Second},
+		{"maximum valid", 5 * time.Minute, 5 * time.Minute},
+		{"below minimum ignored", 500 * time.Millisecond, 30 * time.Second},
+		{"above maximum ignored", 10 * time.Minute, 30 * time.Second},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			opts := newClientOptions()
+			WithTimeout(tt.input)(opts)
+
+			if opts.timeout != tt.expected {
+				t.Errorf("expected timeout=%v, got %v", tt.expected, opts.timeout)
+			}
+		})
+	}
+}
+
+func TestWithUserAgent(t *testing.T) {
+	t.Parallel()
+
+	t.Run("valid user agent", func(t *testing.T) {
+		t.Parallel()
+
+		opts := newClientOptions()
+		WithUserAgent("custom-agent/2.0")(opts)
+
+		if opts.userAgent != "custom-agent/2.0" {
+			t.Errorf("expected userAgent=custom-agent/2.0, got %s", opts.userAgent)
+		}
+	})
+
+	t.Run("empty ignored", func(t *testing.T) {
+		t.Parallel()
+
+		opts := newClientOptions()
+		WithUserAgent("")(opts)
+
+		if opts.userAgent != "slack-manager-go-client/1.0" {
+			t.Errorf("expected default userAgent, got %s", opts.userAgent)
+		}
+	})
+}
+
+func TestWithMaxIdleConns(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		input    int
+		expected int
+	}{
+		{"valid", 50, 50},
+		{"minimum valid", 1, 1},
+		{"zero ignored", 0, 100},
+		{"negative ignored", -1, 100},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			opts := newClientOptions()
+			WithMaxIdleConns(tt.input)(opts)
+
+			if opts.maxIdleConns != tt.expected {
+				t.Errorf("expected maxIdleConns=%d, got %d", tt.expected, opts.maxIdleConns)
+			}
+		})
+	}
+}
+
+func TestWithMaxConnsPerHost(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		input    int
+		expected int
+	}{
+		{"valid", 20, 20},
+		{"minimum valid", 1, 1},
+		{"maximum valid", 100, 100},
+		{"zero ignored", 0, 10},
+		{"negative ignored", -1, 10},
+		{"above maximum ignored", 101, 10},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			opts := newClientOptions()
+			WithMaxConnsPerHost(tt.input)(opts)
+
+			if opts.maxConnsPerHost != tt.expected {
+				t.Errorf("expected maxConnsPerHost=%d, got %d", tt.expected, opts.maxConnsPerHost)
+			}
+		})
+	}
+}
+
+func TestWithIdleConnTimeout(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		input    time.Duration
+		expected time.Duration
+	}{
+		{"valid", 60 * time.Second, 60 * time.Second},
+		{"minimum valid", 1 * time.Second, 1 * time.Second},
+		{"maximum valid", 5 * time.Minute, 5 * time.Minute},
+		{"below minimum ignored", 500 * time.Millisecond, 90 * time.Second},
+		{"above maximum ignored", 10 * time.Minute, 90 * time.Second},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			opts := newClientOptions()
+			WithIdleConnTimeout(tt.input)(opts)
+
+			if opts.idleConnTimeout != tt.expected {
+				t.Errorf("expected idleConnTimeout=%v, got %v", tt.expected, opts.idleConnTimeout)
+			}
+		})
+	}
+}
+
+func TestWithDisableKeepAlive(t *testing.T) {
+	t.Parallel()
+
+	t.Run("disable keep-alive", func(t *testing.T) {
+		t.Parallel()
+
+		opts := newClientOptions()
+		WithDisableKeepAlive(true)(opts)
+
+		if opts.disableKeepAlive != true {
+			t.Errorf("expected disableKeepAlive=true, got %v", opts.disableKeepAlive)
+		}
+	})
+
+	t.Run("enable keep-alive", func(t *testing.T) {
+		t.Parallel()
+
+		opts := newClientOptions()
+		opts.disableKeepAlive = true
+		WithDisableKeepAlive(false)(opts)
+
+		if opts.disableKeepAlive != false {
+			t.Errorf("expected disableKeepAlive=false, got %v", opts.disableKeepAlive)
+		}
+	})
+}
+
+func TestWithMaxRedirects(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		input    int
+		expected int
+	}{
+		{"valid", 5, 5},
+		{"zero (disable redirects)", 0, 0},
+		{"maximum valid", 20, 20},
+		{"negative ignored", -1, 10},
+		{"above maximum ignored", 21, 10},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			opts := newClientOptions()
+			WithMaxRedirects(tt.input)(opts)
+
+			if opts.maxRedirects != tt.expected {
+				t.Errorf("expected maxRedirects=%d, got %d", tt.expected, opts.maxRedirects)
+			}
+		})
+	}
+}
+
 func TestOptionsValidate(t *testing.T) {
 	t.Parallel()
 
@@ -337,6 +563,56 @@ func TestOptionsValidate(t *testing.T) {
 				o.authToken = "token"
 			},
 			wantError: "cannot use both basic auth and token auth - choose one",
+		},
+		{
+			name:      "timeout below minimum",
+			modify:    func(o *Options) { o.timeout = 500 * time.Millisecond },
+			wantError: "timeout must be at least 1s",
+		},
+		{
+			name:      "timeout exceeds max",
+			modify:    func(o *Options) { o.timeout = 10 * time.Minute },
+			wantError: "timeout must not exceed 5m0s",
+		},
+		{
+			name:      "empty userAgent",
+			modify:    func(o *Options) { o.userAgent = "" },
+			wantError: "userAgent must not be empty",
+		},
+		{
+			name:      "maxIdleConns below minimum",
+			modify:    func(o *Options) { o.maxIdleConns = 0 },
+			wantError: "maxIdleConns must be at least 1",
+		},
+		{
+			name:      "maxConnsPerHost below minimum",
+			modify:    func(o *Options) { o.maxConnsPerHost = 0 },
+			wantError: "maxConnsPerHost must be at least 1",
+		},
+		{
+			name:      "maxConnsPerHost exceeds max",
+			modify:    func(o *Options) { o.maxConnsPerHost = 101 },
+			wantError: "maxConnsPerHost must not exceed 100",
+		},
+		{
+			name:      "idleConnTimeout below minimum",
+			modify:    func(o *Options) { o.idleConnTimeout = 500 * time.Millisecond },
+			wantError: "idleConnTimeout must be at least 1s",
+		},
+		{
+			name:      "idleConnTimeout exceeds max",
+			modify:    func(o *Options) { o.idleConnTimeout = 10 * time.Minute },
+			wantError: "idleConnTimeout must not exceed 5m0s",
+		},
+		{
+			name:      "maxRedirects negative",
+			modify:    func(o *Options) { o.maxRedirects = -1 },
+			wantError: "maxRedirects must be non-negative",
+		},
+		{
+			name:      "maxRedirects exceeds max",
+			modify:    func(o *Options) { o.maxRedirects = 21 },
+			wantError: "maxRedirects must not exceed 20",
 		},
 	}
 

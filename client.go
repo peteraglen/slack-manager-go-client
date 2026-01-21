@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"sync"
 
 	"github.com/go-resty/resty/v2"
@@ -60,13 +61,25 @@ func (c *Client) Connect(ctx context.Context) error {
 			return
 		}
 
+		// Configure transport with connection pool settings
+		transport := &http.Transport{
+			MaxIdleConns:      c.options.maxIdleConns,
+			MaxConnsPerHost:   c.options.maxConnsPerHost,
+			IdleConnTimeout:   c.options.idleConnTimeout,
+			DisableKeepAlives: c.options.disableKeepAlive,
+		}
+
 		c.client = resty.New().
 			SetBaseURL(c.baseURL).
+			SetTimeout(c.options.timeout).
+			SetTransport(transport).
+			SetRedirectPolicy(resty.FlexibleRedirectPolicy(c.options.maxRedirects)).
 			SetRetryCount(c.options.retryCount).
 			SetRetryWaitTime(c.options.retryWaitTime).
 			SetRetryMaxWaitTime(c.options.retryMaxWaitTime).
 			AddRetryCondition(c.options.retryPolicy).
-			SetLogger(c.options.requestLogger)
+			SetLogger(c.options.requestLogger).
+			SetHeader("User-Agent", c.options.userAgent)
 
 		for key, value := range c.options.requestHeaders {
 			c.client.SetHeader(key, value)

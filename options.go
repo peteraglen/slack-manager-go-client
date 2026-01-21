@@ -15,6 +15,19 @@ const (
 	maxRetryWaitTime    = 1 * time.Minute
 	minRetryMaxWaitTime = 100 * time.Millisecond
 	maxRetryMaxWaitTime = 5 * time.Minute
+
+	defaultTimeout         = 30 * time.Second
+	minTimeout             = 1 * time.Second
+	maxTimeout             = 5 * time.Minute
+	defaultUserAgent       = "slack-manager-go-client/1.0"
+	defaultMaxIdleConns    = 100
+	defaultMaxConnsPerHost = 10
+	maxMaxConnsPerHost     = 100
+	defaultIdleConnTimeout = 90 * time.Second
+	minIdleConnTimeout     = 1 * time.Second
+	maxIdleConnTimeout     = 5 * time.Minute
+	defaultMaxRedirects    = 10
+	maxMaxRedirects        = 20
 )
 
 // Option is a functional option for configuring a Client.
@@ -31,6 +44,13 @@ type Options struct {
 	basicAuthPassword string
 	authScheme        string
 	authToken         string
+	timeout           time.Duration
+	userAgent         string
+	maxIdleConns      int
+	maxConnsPerHost   int
+	idleConnTimeout   time.Duration
+	disableKeepAlive  bool
+	maxRedirects      int
 }
 
 func newClientOptions() *Options {
@@ -44,6 +64,13 @@ func newClientOptions() *Options {
 			"Content-Type": "application/json",
 			"Accept":       "application/json",
 		},
+		timeout:          defaultTimeout,
+		userAgent:        defaultUserAgent,
+		maxIdleConns:     defaultMaxIdleConns,
+		maxConnsPerHost:  defaultMaxConnsPerHost,
+		idleConnTimeout:  defaultIdleConnTimeout,
+		disableKeepAlive: false,
+		maxRedirects:     defaultMaxRedirects,
 	}
 }
 
@@ -136,6 +163,81 @@ func WithAuthToken(token string) Option {
 	}
 }
 
+// WithTimeout sets the overall request timeout.
+// Values less than 1 second or greater than 5 minutes are ignored.
+// Default is 30 seconds.
+func WithTimeout(timeout time.Duration) Option {
+	return func(o *Options) {
+		if timeout >= minTimeout && timeout <= maxTimeout {
+			o.timeout = timeout
+		}
+	}
+}
+
+// WithUserAgent sets the User-Agent header for all requests.
+// Empty values are ignored.
+// Default is "slack-manager-go-client/1.0".
+func WithUserAgent(userAgent string) Option {
+	return func(o *Options) {
+		if userAgent != "" {
+			o.userAgent = userAgent
+		}
+	}
+}
+
+// WithMaxIdleConns sets the maximum number of idle connections across all hosts.
+// Values less than 1 are ignored.
+// Default is 100.
+func WithMaxIdleConns(n int) Option {
+	return func(o *Options) {
+		if n >= 1 {
+			o.maxIdleConns = n
+		}
+	}
+}
+
+// WithMaxConnsPerHost sets the maximum number of connections per host.
+// Values less than 1 or greater than 100 are ignored.
+// Default is 10.
+func WithMaxConnsPerHost(n int) Option {
+	return func(o *Options) {
+		if n >= 1 && n <= maxMaxConnsPerHost {
+			o.maxConnsPerHost = n
+		}
+	}
+}
+
+// WithIdleConnTimeout sets how long idle connections remain in the pool.
+// Values less than 1 second or greater than 5 minutes are ignored.
+// Default is 90 seconds.
+func WithIdleConnTimeout(timeout time.Duration) Option {
+	return func(o *Options) {
+		if timeout >= minIdleConnTimeout && timeout <= maxIdleConnTimeout {
+			o.idleConnTimeout = timeout
+		}
+	}
+}
+
+// WithDisableKeepAlive disables HTTP keep-alive connections.
+// When true, a new connection is created for each request.
+// Default is false (keep-alive enabled).
+func WithDisableKeepAlive(disable bool) Option {
+	return func(o *Options) {
+		o.disableKeepAlive = disable
+	}
+}
+
+// WithMaxRedirects sets the maximum number of redirects to follow.
+// Use 0 to disable redirects. Values greater than 20 are ignored.
+// Default is 10.
+func WithMaxRedirects(n int) Option {
+	return func(o *Options) {
+		if n >= 0 && n <= maxMaxRedirects {
+			o.maxRedirects = n
+		}
+	}
+}
+
 // Validate checks all options fields for validity and returns an error if any are invalid.
 func (o *Options) Validate() error {
 	if o.retryCount < 0 {
@@ -176,6 +278,46 @@ func (o *Options) Validate() error {
 
 	if o.basicAuthUsername != "" && o.authToken != "" {
 		return errors.New("cannot use both basic auth and token auth - choose one")
+	}
+
+	if o.timeout < minTimeout {
+		return fmt.Errorf("timeout must be at least %v", minTimeout)
+	}
+
+	if o.timeout > maxTimeout {
+		return fmt.Errorf("timeout must not exceed %v", maxTimeout)
+	}
+
+	if o.userAgent == "" {
+		return errors.New("userAgent must not be empty")
+	}
+
+	if o.maxIdleConns < 1 {
+		return errors.New("maxIdleConns must be at least 1")
+	}
+
+	if o.maxConnsPerHost < 1 {
+		return errors.New("maxConnsPerHost must be at least 1")
+	}
+
+	if o.maxConnsPerHost > maxMaxConnsPerHost {
+		return fmt.Errorf("maxConnsPerHost must not exceed %d", maxMaxConnsPerHost)
+	}
+
+	if o.idleConnTimeout < minIdleConnTimeout {
+		return fmt.Errorf("idleConnTimeout must be at least %v", minIdleConnTimeout)
+	}
+
+	if o.idleConnTimeout > maxIdleConnTimeout {
+		return fmt.Errorf("idleConnTimeout must not exceed %v", maxIdleConnTimeout)
+	}
+
+	if o.maxRedirects < 0 {
+		return errors.New("maxRedirects must be non-negative")
+	}
+
+	if o.maxRedirects > maxMaxRedirects {
+		return fmt.Errorf("maxRedirects must not exceed %d", maxMaxRedirects)
 	}
 
 	return nil
