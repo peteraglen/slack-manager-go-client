@@ -16,8 +16,8 @@ import (
 )
 
 // Client is an HTTP client for sending alerts to the Slack Manager API.
-// Use New to create a Client, then call Connect to establish the connection.
-// Call Close when finished to release resources.
+// Use [New] to create a Client, then call [Client.Connect] to establish
+// the connection. Call [Client.Close] when finished to release resources.
 type Client struct {
 	baseURL    string
 	client     *resty.Client
@@ -36,8 +36,8 @@ type apiErrorResponse struct {
 	Error string `json:"error"`
 }
 
-// New creates a new Client with the given base URL and options.
-// The client must be connected with Connect before sending alerts.
+// New creates a new [Client] configured with the given base URL and options.
+// Call [Client.Connect] before sending alerts.
 func New(baseURL string, opts ...Option) *Client {
 	options := newClientOptions()
 
@@ -51,9 +51,9 @@ func New(baseURL string, opts ...Option) *Client {
 	}
 }
 
-// Connect initializes the HTTP client and validates connectivity by pinging the API.
-// This method is safe for concurrent use and will only initialize once.
-// If Connect fails, subsequent calls will return the same error.
+// Connect initializes the HTTP client and validates connectivity by pinging
+// the API. It is safe for concurrent use and only initializes once — if
+// Connect fails, subsequent calls return the same error.
 func (c *Client) Connect(ctx context.Context) error {
 	c.once.Do(func() {
 		if c.baseURL == "" {
@@ -108,8 +108,8 @@ func (c *Client) Connect(ctx context.Context) error {
 	return c.connectErr
 }
 
-// Send posts one or more alerts to the API. Connect must be called first.
-// Returns an error if any alert in the slice is nil.
+// Send posts one or more alerts to the API. [Client.Connect] must be called
+// first. Returns an error if the alerts slice is empty or any element is nil.
 func (c *Client) Send(ctx context.Context, alerts ...*common.Alert) error {
 	if c == nil {
 		return errors.New("alert client is nil")
@@ -141,17 +141,17 @@ func (c *Client) Send(ctx context.Context, alerts ...*common.Alert) error {
 	return c.post(ctx, c.options.alertsEndpoint, body)
 }
 
-// Close releases resources associated with the client.
-// After Close is called, the client should not be used.
+// Close releases idle connections held by the client. After Close is called
+// the client should not be reused.
 func (c *Client) Close() {
 	if c.transport != nil {
 		c.transport.CloseIdleConnections()
 	}
 }
 
-// Ping checks connectivity to the API.
-// Connect must be called first. This can be used to verify
-// the connection is still healthy after initial connect.
+// Ping checks connectivity to the API. [Client.Connect] must be called
+// first. Use this to verify the connection is still healthy after the
+// initial connect.
 func (c *Client) Ping(ctx context.Context) error {
 	if c == nil {
 		return errors.New("alert client is nil")
@@ -164,9 +164,9 @@ func (c *Client) Ping(ctx context.Context) error {
 	return c.ping(ctx)
 }
 
-// RestyClient returns the underlying resty.Client for advanced use cases.
-// Returns nil if Connect has not been called.
-// Use with caution: modifications may affect client behavior.
+// RestyClient returns the underlying resty.Client for advanced configuration.
+// Returns nil if [Client.Connect] has not been called. Use with caution:
+// direct modifications may affect client behaviour.
 func (c *Client) RestyClient() *resty.Client {
 	return c.client
 }
