@@ -1,4 +1,4 @@
-# slack-manager-go-client
+# go-client
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/slackmgr/go-client.svg)](https://pkg.go.dev/github.com/slackmgr/go-client)
 [![Go Report Card](https://goreportcard.com/badge/github.com/slackmgr/go-client)](https://goreportcard.com/report/github.com/slackmgr/go-client)
