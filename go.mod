@@ -1,10 +1,10 @@
-module github.com/peteraglen/slack-manager-go-client
+module github.com/slackmgr/go-client
 
 go 1.25
 
 require (
 	github.com/go-resty/resty/v2 v2.17.2
-	github.com/peteraglen/slack-manager-common v0.2.1
+	github.com/slackmgr/types v0.3.0
 )
 
 require (

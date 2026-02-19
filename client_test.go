@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
-	common "github.com/peteraglen/slack-manager-common"
+	"github.com/slackmgr/types"
 )
 
 func TestNew(t *testing.T) {
@@ -224,7 +224,7 @@ func TestSend_NilClient(t *testing.T) {
 
 	var client *Client
 
-	err := client.Send(context.Background(), &common.Alert{})
+	err := client.Send(context.Background(), &types.Alert{})
 
 	if err == nil {
 		t.Fatal("expected error for nil client")
@@ -240,7 +240,7 @@ func TestSend_NotConnected(t *testing.T) {
 
 	client := New("http://example.com")
 
-	err := client.Send(context.Background(), &common.Alert{})
+	err := client.Send(context.Background(), &types.Alert{})
 
 	if err == nil {
 		t.Fatal("expected error for not connected client")
@@ -284,7 +284,7 @@ func TestSend_NilAlert(t *testing.T) {
 	client := New(server.URL)
 	_ = client.Connect(context.Background())
 
-	err := client.Send(context.Background(), &common.Alert{}, nil, &common.Alert{})
+	err := client.Send(context.Background(), &types.Alert{}, nil, &types.Alert{})
 
 	if err == nil {
 		t.Fatal("expected error for nil alert")
@@ -311,7 +311,7 @@ func TestSend_Success(t *testing.T) {
 	client := New(server.URL)
 	_ = client.Connect(context.Background())
 
-	alert := &common.Alert{
+	alert := &types.Alert{
 		Header: "Test Alert",
 	}
 	err := client.Send(context.Background(), alert)
@@ -345,7 +345,7 @@ func TestSend_HTTPError_JSONErrorResponse(t *testing.T) {
 	client := New(server.URL, WithRetryCount(0))
 	_ = client.Connect(context.Background())
 
-	err := client.Send(context.Background(), &common.Alert{})
+	err := client.Send(context.Background(), &types.Alert{})
 
 	if err == nil {
 		t.Fatal("expected error for HTTP error")
@@ -377,7 +377,7 @@ func TestSend_HTTPError_PlainTextResponse(t *testing.T) {
 	client := New(server.URL, WithRetryCount(0))
 	_ = client.Connect(context.Background())
 
-	err := client.Send(context.Background(), &common.Alert{})
+	err := client.Send(context.Background(), &types.Alert{})
 
 	if err == nil {
 		t.Fatal("expected error for HTTP error")
@@ -406,7 +406,7 @@ func TestSend_HTTPError_JSONWithoutErrorField(t *testing.T) {
 	client := New(server.URL, WithRetryCount(0))
 	_ = client.Connect(context.Background())
 
-	err := client.Send(context.Background(), &common.Alert{})
+	err := client.Send(context.Background(), &types.Alert{})
 
 	if err == nil {
 		t.Fatal("expected error for HTTP error")
@@ -433,7 +433,7 @@ func TestSend_HTTPError_EmptyResponse(t *testing.T) {
 	client := New(server.URL, WithRetryCount(0))
 	_ = client.Connect(context.Background())
 
-	err := client.Send(context.Background(), &common.Alert{})
+	err := client.Send(context.Background(), &types.Alert{})
 
 	if err == nil {
 		t.Fatal("expected error for HTTP error")
@@ -457,7 +457,7 @@ func TestSend_RequestError(t *testing.T) {
 	// Close server to cause connection error on Send
 	server.Close()
 
-	err := client.Send(context.Background(), &common.Alert{})
+	err := client.Send(context.Background(), &types.Alert{})
 
 	if err == nil {
 		t.Fatal("expected error for request failure")
@@ -501,7 +501,7 @@ func TestSend_MultipleAlerts(t *testing.T) {
 	client := New(server.URL)
 	_ = client.Connect(context.Background())
 
-	alerts := []*common.Alert{
+	alerts := []*types.Alert{
 		{Header: "Alert 1"},
 		{Header: "Alert 2"},
 		{Header: "Alert 3"},
@@ -535,7 +535,7 @@ func TestSend_JSONFormat(t *testing.T) {
 	client := New(server.URL)
 	_ = client.Connect(context.Background())
 
-	alert := &common.Alert{
+	alert := &types.Alert{
 		Header: "Test Header",
 		Text:   "Test Text",
 	}
@@ -610,7 +610,7 @@ func TestSend_ContextCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
 
-	err := client.Send(ctx, &common.Alert{Header: "test"})
+	err := client.Send(ctx, &types.Alert{Header: "test"})
 	if err == nil {
 		t.Fatal("expected error for cancelled context")
 	}
@@ -637,7 +637,7 @@ func TestSend_UnicodeContent(t *testing.T) {
 	_ = client.Connect(context.Background())
 
 	// Test with various unicode characters (intentionally testing non-ASCII support)
-	alert := &common.Alert{
+	alert := &types.Alert{
 		Header: "Alert: 日本語 🚨 émojis",    //nolint:gosmopolitan // testing unicode support
 		Text:   "Здравствуй мир! 你好世界 🌍", //nolint:gosmopolitan // testing unicode support
 	}
@@ -799,7 +799,7 @@ func TestSend_CustomAlertsEndpoint(t *testing.T) {
 	client := New(server.URL, WithAlertsEndpoint("v2/alerts"))
 	_ = client.Connect(context.Background())
 
-	err := client.Send(context.Background(), &common.Alert{Header: "test"})
+	err := client.Send(context.Background(), &types.Alert{Header: "test"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

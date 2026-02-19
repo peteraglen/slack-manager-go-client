@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
-	common "github.com/peteraglen/slack-manager-common"
+	"github.com/slackmgr/types"
 )
 
 // Client is an HTTP client for sending alerts to the Slack Manager API.
@@ -28,7 +28,7 @@ type Client struct {
 }
 
 type alertsList struct {
-	Alerts []*common.Alert `json:"alerts"`
+	Alerts []*types.Alert `json:"alerts"`
 }
 
 // apiErrorResponse represents the standard error response from the API.
@@ -110,7 +110,7 @@ func (c *Client) Connect(ctx context.Context) error {
 
 // Send posts one or more alerts to the API. [Client.Connect] must be called
 // first. Returns an error if the alerts slice is empty or any element is nil.
-func (c *Client) Send(ctx context.Context, alerts ...*common.Alert) error {
+func (c *Client) Send(ctx context.Context, alerts ...*types.Alert) error {
 	if c == nil {
 		return errors.New("alert client is nil")
 	}

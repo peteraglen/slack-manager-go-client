@@ -17,7 +17,7 @@ make init              # Initialize modules (go mod tidy)
 make test              # Full test suite: gosec, fmt, test with race detection, vet
 make lint              # Run golangci-lint
 make lint-fix          # Auto-fix linting issues
-make bump-common-lib   # Update slack-manager-common to latest
+make bump-common-lib   # Update types package dependency to latest
 ```
 
 Run a single test:
@@ -64,7 +64,7 @@ Changes that require a README update include (but are not limited to):
 
 4. **Create the GitHub release:**
    ```bash
-   gh release create vX.Y.Z --repo peteraglen/slack-manager-common --title "vX.Y.Z" --notes "..."
+   gh release create vX.Y.Z --repo slackmgr/go-client --title "vX.Y.Z" --notes "..."
    ```
    Use the same content as the changelog entry for the release notes.
 
@@ -91,13 +91,13 @@ Follows [Semantic Versioning](https://semver.org/):
 **Workflow:**
 ```go
 c := client.New(baseURL, client.WithRetryCount(5), client.WithAuthToken("token"))
-c, err := c.Connect(ctx)  // Validates via ping
+err := c.Connect(ctx)  // Validates via ping
 err = c.Send(ctx, alerts...)
 ```
 
 **Dependencies:**
 - `github.com/go-resty/resty/v2` - HTTP client with retry support
-- `github.com/peteraglen/slack-manager-common` - Shared Alert type
+- `github.com/slackmgr/types` - Shared Alert type
 
 ## Code Style
 

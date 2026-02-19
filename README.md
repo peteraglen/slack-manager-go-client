@@ -1,16 +1,16 @@
 # slack-manager-go-client
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/peteraglen/slack-manager-go-client.svg)](https://pkg.go.dev/github.com/peteraglen/slack-manager-go-client)
-[![Go Report Card](https://goreportcard.com/badge/github.com/peteraglen/slack-manager-go-client)](https://goreportcard.com/report/github.com/peteraglen/slack-manager-go-client)
+[![Go Reference](https://pkg.go.dev/badge/github.com/slackmgr/go-client.svg)](https://pkg.go.dev/github.com/slackmgr/go-client)
+[![Go Report Card](https://goreportcard.com/badge/github.com/slackmgr/go-client)](https://goreportcard.com/report/github.com/slackmgr/go-client)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![CI](https://github.com/peteraglen/slack-manager-go-client/workflows/CI/badge.svg)](https://github.com/peteraglen/slack-manager-go-client/actions)
+[![CI](https://github.com/slackmgr/go-client/workflows/CI/badge.svg)](https://github.com/slackmgr/go-client/actions)
 
-A Go HTTP client for the [Slack Manager](https://github.com/peteraglen/slack-manager) API. Wraps [resty](https://github.com/go-resty/resty) with built-in retry logic, connection pooling, and pluggable logging.
+A Go HTTP client for the [Slack Manager](https://github.com/slackmgr/slack-manager) API. Wraps [resty](https://github.com/go-resty/resty) with built-in retry logic, connection pooling, and pluggable logging.
 
 ## Installation
 
 ```bash
-go get github.com/peteraglen/slack-manager-go-client
+go get github.com/slackmgr/go-client
 ```
 
 Requires Go 1.25+.
@@ -22,8 +22,8 @@ import (
     "context"
     "log"
 
-    client "github.com/peteraglen/slack-manager-go-client"
-    common "github.com/peteraglen/slack-manager-common"
+    client "github.com/slackmgr/go-client"
+    "github.com/slackmgr/types"
 )
 
 ctx := context.Background()
@@ -38,7 +38,7 @@ if err := c.Connect(ctx); err != nil {
 }
 defer c.Close()
 
-alert := &common.Alert{
+alert := &types.Alert{
     // populate alert fields
 }
 

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-02-19
+
+### Changed
+
+- Rename Go module from `github.com/peteraglen/slack-manager-go-client` to `github.com/slackmgr/go-client`
+- Rename types dependency from `github.com/peteraglen/slack-manager-common` to `github.com/slackmgr/types` and bump to v0.3.0
+
 ## [0.1.1] - 2026-02-19
 
 ### Added
@@ -73,8 +80,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `WithTimeout`, `WithUserAgent`, `WithRequestHeader` options
 - `WithRequestLogger`, `WithRetryPolicy` options
 
-[Unreleased]: https://github.com/peteraglen/slack-manager-go-client/compare/v0.1.1...HEAD
-[0.1.1]: https://github.com/peteraglen/slack-manager-go-client/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/peteraglen/slack-manager-go-client/compare/v0.0.2...v0.1.0
-[0.0.2]: https://github.com/peteraglen/slack-manager-go-client/compare/v0.0.1...v0.0.2
-[0.0.1]: https://github.com/peteraglen/slack-manager-go-client/releases/tag/v0.0.1
+[Unreleased]: https://github.com/slackmgr/go-client/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/slackmgr/go-client/compare/v0.1.1...v0.2.0
+[0.1.1]: https://github.com/slackmgr/go-client/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/slackmgr/go-client/compare/v0.0.2...v0.1.0
+[0.0.2]: https://github.com/slackmgr/go-client/compare/v0.0.1...v0.0.2
+[0.0.1]: https://github.com/slackmgr/go-client/releases/tag/v0.0.1
