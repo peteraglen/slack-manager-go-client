@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/slackmgr/go-client/workflows/CI/badge.svg)](https://github.com/slackmgr/go-client/actions)
 
-A Go HTTP client for the [Slack Manager](https://github.com/slackmgr/slack-manager) API. Wraps [resty](https://github.com/go-resty/resty) with built-in retry logic, connection pooling, and pluggable logging.
+A Go HTTP client for the [Slack Manager](https://github.com/slackmgr/core) API. Wraps [resty](https://github.com/go-resty/resty) with built-in retry logic, connection pooling, and pluggable logging.
 
 ## Installation
 
